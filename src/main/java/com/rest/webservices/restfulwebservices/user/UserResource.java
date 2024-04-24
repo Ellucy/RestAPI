@@ -1,6 +1,7 @@
 package com.rest.webservices.restfulwebservices.user;
 
 import com.rest.webservices.restfulwebservices.exception.UserNotFountException;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,12 +35,17 @@ public class UserResource {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         User savedUser = service.save(user);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedUser.getId())
                 .toUri();
         return ResponseEntity.created(location).build();    //returns status 201
+    }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUserById(@PathVariable int id) {
+        service.deleteUserById(id);
     }
 }
