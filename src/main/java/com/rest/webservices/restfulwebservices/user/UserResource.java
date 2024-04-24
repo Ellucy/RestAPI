@@ -4,6 +4,8 @@ import com.rest.webservices.restfulwebservices.exception.UserNotFountException;
 import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -11,6 +13,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserResource {
@@ -29,14 +34,19 @@ public class UserResource {
     }
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable int id) {
+    public EntityModel<User> getUserById(@PathVariable int id) {
 
         User user = service.findOne(id);
 
         if(user== null) {
             throw new UserNotFountException("id: " + id);
         }
-        return user;
+
+        EntityModel<User> entityModel = EntityModel.of(user);
+
+        WebMvcLinkBuilder link= linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        entityModel.add(link.withRel("all-users"));
+        return entityModel ;
     }
 
     @PostMapping("/users")
